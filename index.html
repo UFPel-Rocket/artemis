@@ -873,7 +873,19 @@
       <div>
         <h3>Por que Max-Q é o ponto crítico?</h3>
         <p>
-          A força de arrasto aerodinâmico é diretamente proporcional à pressão dinâmica: F_drag = C_D · A · q. A Max-Q, essa força atinge valores que podem <strong>superar a capacidade estrutural</strong> do foguete se ele desviar minimamente da direção do vento.
+          A força de arrasto aerodinâmico é dada por:
+        </p>
+        <div class="eq-block">
+          <div class="eq-tag">Força de Arrasto — Equação Completa</div>
+          <div class="eq-body">F<sub>drag</sub> = ½ · C<sub>D</sub> · ρ · v² · A</div>
+          <div class="eq-note">
+            C<sub>D</sub> = coeficiente de arrasto (adimensional) | ρ = densidade do ar [kg/m³] | v = velocidade [m/s] | A = área frontal de referência [m²]<br><br>
+            <strong>Por que v²?</strong> — O arrasto vem da pressão dinâmica q = ½ρv², que representa a energia cinética por unidade de volume do escoamento. Duplicar a velocidade <em>quadruplica</em> a força de arrasto. É por isso que o throttle-down dos RS-25 antes do Max-Q é crítico: reduzir v em 10% reduz F<sub>drag</sub> em ~19%.<br><br>
+            A forma abreviada F<sub>drag</sub> = C<sub>D</sub> · A · q apenas substitui q = ½ρv² — as duas expressões são idênticas.
+          </div>
+        </div>
+        <p>
+          A Max-Q, essa força atinge valores que podem <strong>superar a capacidade estrutural</strong> do foguete se ele desviar minimamente da direção do vento.
         </p>
         <p>
           O SLS é uma estrutura extremamente esbelta — como um lápis de 100 metros. Qualquer ângulo de ataque em relação ao escoamento gera momentos fletores laterais enormes. Por isso, a Max-Q é a fase de maior risco de perda do veículo por instabilidade.
