@@ -526,6 +526,17 @@ function renderContent() {
   const el = document.getElementById('content');
   el.innerHTML = `
     <div class="phase-panel active">
+      <div class="phase-img-wrap">
+        <img src="${p.img}" alt="${p.name}"
+          onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+          style="width:100%; max-height:280px; object-fit:cover; display:block;">
+        <div class="phase-img-placeholder" style="display:none;">
+          <span style="font-size:2rem;">🖼</span>
+          <span class="ph-fname">${p.img}</span>
+          <span style="font-size:.78rem; font-style:italic; color:var(--ink-light);">Adicione a imagem na pasta img/</span>
+        </div>
+        <div class="phase-img-caption">📷 ${p.imgcaption}</div>
+      </div>
       <div class="panel-header">
         <div class="panel-phase-tag">${p.tag}</div>
         <h2>${p.name}</h2>
