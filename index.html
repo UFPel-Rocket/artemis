@@ -455,6 +455,93 @@
     .ref:hover { background: var(--accent-fire); }
     .sec-dark .ref { background: var(--accent-steam); color: var(--ink); }
     .refs ol li { scroll-margin-top: 80px; }
+
+    /* ===== QUESTÕES ===== */
+    .quiz-sec { background: #f0eee8; }
+    .quiz-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 14px; margin: 28px 0;
+    }
+    .quiz-card {
+      background: #fff;
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: 20px 22px;
+    }
+    .quiz-num {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 8px;
+    }
+    .quiz-q {
+      font-size: .92rem; font-weight: 600;
+      color: var(--ink); margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .quiz-options { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .quiz-options li {
+      display: flex; align-items: flex-start; gap: 9px;
+    }
+    .quiz-opt-btn {
+      display: flex; align-items: flex-start; gap: 9px;
+      background: #f5f4f0; border: 1px solid #ddd;
+      border-radius: 5px; padding: 7px 11px;
+      cursor: pointer; width: 100%;
+      font-family: 'Libre Franklin', sans-serif;
+      font-size: .82rem; color: var(--ink-mid);
+      text-align: left; transition: all .18s; line-height: 1.45;
+    }
+    .quiz-opt-btn:hover { background: #e8f0fb; border-color: var(--accent); }
+    .quiz-opt-btn.correct { background: #e6f4ea; border-color: #2d7a4e; color: #1a4d30; font-weight: 600; }
+    .quiz-opt-btn.wrong   { background: #fdecea; border-color: #c0392b; color: #7b1f1f; }
+    .quiz-opt-btn.reveal  { background: #e8f0fb; border-color: var(--accent); }
+    .quiz-key {
+      font-size: .78rem; color: #2d7a4e;
+      margin-top: 10px; padding: 8px 12px;
+      background: #e6f4ea; border-radius: 4px;
+      display: none; line-height: 1.5;
+    }
+    .quiz-key.show { display: block; }
+
+    /* Questões para refletir */
+    .reflect-list {
+      display: flex; flex-direction: column; gap: 14px;
+      margin: 24px 0;
+    }
+    .reflect-card {
+      background: var(--ink);
+      border-radius: 8px; padding: 20px 24px;
+      display: flex; gap: 16px; align-items: flex-start;
+    }
+    .reflect-icon {
+      font-size: 1.4rem; flex-shrink: 0; margin-top: 2px;
+    }
+    .reflect-text {
+      font-size: .92rem; color: rgba(255,255,255,.82);
+      line-height: 1.65;
+    }
+    .reflect-text strong { color: #fff; }
+
+    /* Botão painel */
+    .painel-cta {
+      margin: 40px 0 0;
+      display: flex; justify-content: center;
+    }
+    .painel-btn {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--accent); color: #fff;
+      border: none; border-radius: 6px;
+      padding: 14px 28px; font-size: .95rem;
+      font-family: 'Libre Franklin', sans-serif;
+      font-weight: 600; cursor: pointer;
+      text-decoration: none;
+      transition: background .18s, transform .15s;
+      letter-spacing: .02em;
+    }
+    .painel-btn:hover { background: #153d6a; transform: translateY(-2px); }
+    .painel-btn svg { flex-shrink: 0; }
   </style>
 </head>
 <body>
@@ -1122,6 +1209,153 @@
   </div>
 </section>
 
+
+<!-- QUESTÕES -->
+<section class="sec quiz-sec" id="questoes">
+  <div class="sec-inner">
+    <div class="slabel">Avaliação</div>
+    <h2>Questões de Múltipla Escolha</h2>
+    <p>Clique na alternativa que considera correta. O gabarito aparece após a escolha.</p>
+
+    <div class="quiz-grid">
+
+      <!-- Q1 -->
+      <div class="quiz-card">
+        <div class="quiz-num">Questão 01</div>
+        <p class="quiz-q">Qual grandeza física, em SI, descreve corretamente a força de arrasto aerodinâmico sobre o SLS?</p>
+        <ul class="quiz-options">
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">a) Pascal (Pa) — pressão dinâmica</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'correct')">b) Newton (N) — F = ½·C_D·ρ·v²·A</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">c) Watt (W) — potência dissipada</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">d) Joule (J) — energia cinética</button></li>
+        </ul>
+        <div class="quiz-key">✅ <strong>b) Newton.</strong> F_drag = ½·C_D·ρ·v²·A. A pressão dinâmica q = ½ρv² é intermediária — a força resulta de q multiplicado por C_D e pela área de referência A.</div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quiz-card">
+        <div class="quiz-num">Questão 02</div>
+        <p class="quiz-q">Por que a câmara de combustão do RS-25 (3.600 K) não derrete, mesmo superando o ponto de fusão do tungstênio?</p>
+        <ul class="quiz-options">
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">a) A liga de aço inox suporta até 4.000 K</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">b) A combustão é intermitente e a parede esfria entre ciclos</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'correct')">c) O LH₂ criogênico circula por ~390 canais e remove calor por convecção forçada antes de ser injetado</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">d) A câmara opera em vácuo, sem condução de calor</button></li>
+        </ul>
+        <div class="quiz-key">✅ <strong>c) Resfriamento regenerativo.</strong> O hidrogênio líquido a –253 °C percorre canais axiais na parede de NARloy-Z, absorvendo calor por convecção forçada. O mecanismo é análogo à irrigação contínua de uma ferida crônica.</div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="quiz-card">
+        <div class="quiz-num">Questão 03</div>
+        <p class="quiz-q">O que define o instante de Max-Q durante a ascensão do SLS?</p>
+        <ul class="quiz-options">
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">a) O momento em que a velocidade atinge Mach 1</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">b) O pico de temperatura aerodinâmica na ogiva</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'correct')">c) O máximo do produto ½·ρ(h)·v²(t) durante a ascensão</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">d) O corte dos boosters sólidos</button></li>
+        </ul>
+        <div class="quiz-key">✅ <strong>c)</strong> Max-Q ocorre quando q = ½ρv² é máximo — a densidade ainda não caiu o suficiente para compensar o aumento de v². É o ponto de maior carga estrutural, análogo ao pico de pressão sobre um curativo de alta compressão.</div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="quiz-card">
+        <div class="quiz-num">Questão 04</div>
+        <p class="quiz-q">Se a velocidade do foguete dobrar, como varia a força de arrasto (mantendo ρ e C_D constantes)?</p>
+        <ul class="quiz-options">
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">a) Dobra (×2)</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">b) Triplica (×3)</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'correct')">c) Quadruplica (×4)</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">d) Aumenta ×8 — relação cúbica</button></li>
+        </ul>
+        <div class="quiz-key">✅ <strong>c) Quadruplica.</strong> F_drag ∝ v². Dobrar v → v² aumenta 4×. Por isso o throttle-down dos RS-25 antes do Max-Q é crítico: reduzir v em 10% já reduz F_drag em ~19%.</div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="quiz-card">
+        <div class="quiz-num">Questão 05</div>
+        <p class="quiz-q">Qual o mecanismo principal de transferência de calor no espaço (acima de 150 km)?</p>
+        <ul class="quiz-options">
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">a) Convecção forçada pelo vento solar</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">b) Condução pela fuselagem metálica</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'correct')">c) Radiação — emissão de corpo negro (Stefan-Boltzmann)</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">d) Convecção natural do ar rarefeito</button></li>
+        </ul>
+        <div class="quiz-key">✅ <strong>c) Radiação.</strong> No vácuo, não há fluido para condução ou convecção. A troca de calor obedece q = ε·σ·T⁴. A Orion usa MLI (Multi-Layer Insulation) e superfícies de alta emissividade para gerir temperaturas entre –150 °C e +120 °C.</div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="quiz-card">
+        <div class="quiz-num">Questão 06</div>
+        <p class="quiz-q">Por que o sistema de dilúvio d'água (IOP/SS) usa água — e não outro fluido — para suprimir a onda de sobrepressão de ignição?</p>
+        <ul class="quiz-options">
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">a) Porque a água é condutora elétrica e dissipa a carga estática</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'correct')">b) Porque a vaporização absorve 2.260 kJ/kg (calor latente), dissipando energia acústica por mudança de fase</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">c) Porque resfria a plataforma por condução de calor sólido-líquido</button></li>
+          <li><button class="quiz-opt-btn" onclick="answer(this,'wrong')">d) Porque cria uma barreira física que reflete a onda de choque</button></li>
+        </ul>
+        <div class="quiz-key">✅ <strong>b) Calor latente de vaporização.</strong> A água converte energia acústica em trabalho de mudança de fase (líquido→vapor), removendo ~2.260 kJ por kg evaporado — o mesmo princípio termodinâmico da irrigação que resfria o leito de uma ferida crônica.</div>
+      </div>
+
+    </div>
+
+    <!-- QUESTÕES PARA REFLETIR -->
+    <div class="slabel" style="margin-top:48px;">Para Refletir</div>
+    <h2>Questões Abertas</h2>
+    <p>Sem gabarito único — o objetivo é conectar os conceitos físicos à prática clínica.</p>
+
+    <div class="reflect-list">
+      <div class="reflect-card">
+        <div class="reflect-icon">🔥</div>
+        <div class="reflect-text">
+          <strong>O resfriamento regenerativo do RS-25</strong> usa o próprio combustível criogênico para absorver calor da câmara antes de queimá-lo. Em feridas crônicas, a irrigação com soro remove calor e debris do leito. <em>Que princípio físico comum une as duas situações? Como a lei de Fourier (condução) e a convecção forçada aparecem nos dois contextos?</em>
+        </div>
+      </div>
+      <div class="reflect-card">
+        <div class="reflect-icon">💧</div>
+        <div class="reflect-text">
+          <strong>O sistema de dilúvio libera 67.000 L/s por gravidade pura</strong> — ΔP = ρgh, sem bombas. Na terapia de feridas por pressão negativa (NPWT), a pressão subatmosférica dirige o fluido. <em>Compare os dois sistemas: qual grandeza em SI descreve o "motor" de cada um? Quais são os limites físicos de cada abordagem?</em>
+        </div>
+      </div>
+      <div class="reflect-card">
+        <div class="reflect-icon">⚡</div>
+        <div class="reflect-text">
+          <strong>Em Max-Q, o foguete reduz o empuxo propositalmente</strong> para não ser destruído pela pressão dinâmica. Em cuidados intensivos, reduzimos a FiO₂ e a PEEP quando o pulmão não suporta. <em>O conceito de "throttle-down" existe na fisiologia? Em que situações clínicas a estratégia de reduzir a "entrada" para proteger a "estrutura" é aplicada?</em>
+        </div>
+      </div>
+      <div class="reflect-card">
+        <div class="reflect-icon">🌡</div>
+        <div class="reflect-text">
+          <strong>A temperatura de câmara (3.600 K) supera o ponto de fusão de qualquer metal</strong> — o motor sobrevive apenas pelo controle ativo de transferência de calor. O corpo humano entra em colapso com variação de apenas 5 K na temperatura central. <em>O que essa diferença de tolerância térmica revela sobre os mecanismos de homeostase biológica versus engenharia térmica?</em>
+        </div>
+      </div>
+      <div class="reflect-card">
+        <div class="reflect-icon">⏱</div>
+        <div class="reflect-text">
+          <strong>Em 8 minutos, o SLS sai do repouso e atinge órbita.</strong> Em 8 minutos de isquemia cerebral total, a lesão neuronal é irreversível. <em>O tempo é a variável mais crítica nos dois sistemas. Como o conceito de "janela terapêutica" em emergências clínicas se relaciona com as "janelas de fase" da ascensão do foguete? O que acontece quando se perde o timing em cada contexto?</em>
+        </div>
+      </div>
+      <div class="reflect-card">
+        <div class="reflect-icon">🩺</div>
+        <div class="reflect-text">
+          <strong>A ferida crônica e o foguete compartilham um desafio:</strong> transferir calor, manter pressão adequada, controlar fluxo e proteger a estrutura ao longo do tempo. <em>Escolha um parâmetro físico (pressão, temperatura, fluxo ou tempo) e escreva um parágrafo explicando como ele é monitorado e controlado tanto na engenharia do lançamento quanto no cuidado de feridas crônicas.</em>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTÃO PAINEL INTERATIVO -->
+    <div class="painel-cta">
+      <a href="painel.html" class="painel-btn" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+        </svg>
+        Ver Painel Interativo — Parâmetros da Ascensão
+      </a>
+    </div>
+
+  </div>
+</section>
+
 <!-- SÍNTESE -->
 <section class="sec" id="sintese">
   <div class="sec-inner">
@@ -1174,5 +1408,19 @@
   </div>
 </footer>
 
+
+<script>
+function answer(btn, result) {
+  const card = btn.closest('.quiz-card');
+  const btns = card.querySelectorAll('.quiz-opt-btn');
+  btns.forEach(b => b.disabled = true);
+  btn.classList.add(result);
+  if (result === 'wrong') {
+    // highlight correct
+    btns.forEach(b => { if (b.getAttribute('onclick').includes("'correct'")) b.classList.add('reveal'); });
+  }
+  card.querySelector('.quiz-key').classList.add('show');
+}
+</script>
 </body>
 </html>

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Interativo — Ascensão Artemis SLS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Libre+Franklin:ital,wght@0,300;0,400;0,600;0,700&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0f1117;
+      --ink-mid: #2e3444;
+      --ink-light: #5a6278;
+      --paper: #f7f5f0;
+      --accent: #1b4f8a;
+      --fire: #c94b1e;
+      --gold: #d4870a;
+      --steam: #5ba3c9;
+      --green: #2d7a4e;
+      --rule: rgba(15,17,23,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Libre Franklin', sans-serif;
+      font-weight: 300;
+      font-size: 15px;
+      line-height: 1.7;
+      min-height: 100vh;
+    }
+
+    /* TOPBAR */
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 13px 32px;
+      background: #fff;
+      border-bottom: 1px solid var(--rule);
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; }
+    .topbar-logo { height: 34px; width: auto; }
+    .topbar-brand { font-weight: 700; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-light); }
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--ink-light); font-size: 12px;
+      text-decoration: none; letter-spacing: .08em;
+      transition: color .18s;
+    }
+    .back-btn:hover { color: var(--ink); }
+
+    /* HERO STRIP */
+    .hero-strip {
+      padding: 40px 32px 28px;
+      border-bottom: 1px solid var(--rule);
+      background: #fff;
+    }
+    .hero-strip h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.6rem, 3.5vw, 2.6rem);
+      line-height: 1.15; margin-bottom: 8px;
+    }
+    .hero-strip h1 em { font-style: italic; color: var(--gold); }
+    .hero-strip p { font-size: .9rem; color: var(--ink-light); max-width: 600px; }
+
+    /* MAIN LAYOUT */
+    .main { display: grid; grid-template-columns: 260px 1fr; gap: 0; min-height: calc(100vh - 140px); }
+    @media (max-width: 760px) { .main { grid-template-columns: 1fr; } }
+
+    /* PHASE SIDEBAR */
+    .sidebar {
+      border-right: 1px solid var(--rule); background: #fff;
+      padding: 24px 0;
+      position: sticky; top: 0; height: calc(100vh - 60px);
+      overflow-y: auto; scrollbar-width: thin;
+    }
+    .sidebar-title {
+      font-size: 9px; font-weight: 700; letter-spacing: .22em;
+      text-transform: uppercase; color: var(--ink-light);
+      padding: 0 20px 12px;
+    }
+    .phase-btn {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 20px; width: 100%;
+      background: none; border: none; cursor: pointer;
+      text-align: left; transition: background .15s;
+      border-left: 3px solid transparent;
+    }
+    .phase-btn:hover { background: var(--paper); }
+    .phase-btn.active {
+      background: #fdf0ec;
+      border-left-color: var(--fire);
+    }
+    .pb-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .pb-label { font-size: .82rem; color: var(--ink-mid); line-height: 1.35; }
+    .pb-time { font-size: .72rem; color: var(--ink-light); font-family: 'Source Code Pro', monospace; }
+    .phase-btn.active .pb-label { color: var(--ink); font-weight: 600; }
+
+    /* CONTENT PANEL */
+    .content { padding: 32px 36px; overflow-y: auto; background: var(--paper); }
+    @media (max-width: 760px) { .sidebar { height: auto; position: static; } .content { padding: 24px 20px; } }
+
+    .phase-panel { display: none; }
+    .phase-panel.active { display: block; animation: fadeIn .3s ease; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+
+    .panel-header { margin-bottom: 28px; }
+    .panel-phase-tag {
+      font-size: 10px; font-weight: 700; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--fire); margin-bottom: 10px;
+    }
+    .panel-header h2 {
+      font-family: 'DM Serif Display', serif;
+      font-size: clamp(1.4rem, 2.5vw, 2rem);
+      line-height: 1.2; margin-bottom: 6px;
+    }
+    .panel-alt {
+      font-size: .8rem; color: var(--ink-light);
+      font-family: 'Source Code Pro', monospace;
+    }
+
+    /* PARAM GRID */
+    .param-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 12px; margin: 24px 0;
+    }
+    .param-card {
+      background: #fff;
+      border: 1px solid var(--rule);
+      border-radius: 8px; padding: 16px 18px;
+      position: relative; overflow: hidden;
+    }
+    .param-card::before {
+      content: ''; position: absolute;
+      top: 0; left: 0; right: 0; height: 2px;
+    }
+    .param-card.p-force::before   { background: var(--fire); }
+    .param-card.p-heat::before    { background: #e8760a; }
+    .param-card.p-pressure::before{ background: var(--steam); }
+    .param-card.p-velocity::before{ background: var(--gold); }
+    .param-card.p-flow::before    { background: var(--green); }
+    .param-card.p-thermal::before { background: #a855f7; }
+
+    .param-label {
+      font-size: 9px; font-weight: 700; letter-spacing: .18em;
+      text-transform: uppercase; color: var(--ink-light);
+      margin-bottom: 6px;
+    }
+    .param-value {
+      font-family: 'Source Code Pro', monospace;
+      font-size: 1.4rem; font-weight: 600;
+      color: var(--ink); line-height: 1; margin-bottom: 4px;
+    }
+    .param-unit { font-size: .72rem; color: var(--ink-light); margin-bottom: 8px; }
+    .param-desc { font-size: .78rem; color: var(--ink-light); line-height: 1.5; }
+
+    /* BAR CHART */
+    .bar-wrap { margin: 6px 0 4px; }
+    .bar-track {
+      height: 4px; background: rgba(0,0,0,.08);
+      border-radius: 2px; overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%; border-radius: 2px;
+      transition: width .6s ease;
+    }
+
+    /* CHALLENGE BOX */
+    .challenge-box {
+      background: #fdf0ec;
+      border: 1px solid rgba(201,75,30,.25);
+      border-radius: 8px; padding: 18px 22px;
+      margin: 24px 0;
+    }
+    .challenge-tag {
+      font-size: 9px; font-weight: 700; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--fire); margin-bottom: 8px;
+    }
+    .challenge-list {
+      list-style: none; display: flex; flex-direction: column; gap: 8px;
+    }
+    .challenge-list li {
+      display: flex; gap: 10px; align-items: flex-start;
+      font-size: .84rem; color: var(--ink-mid); line-height: 1.55;
+    }
+    .challenge-list li::before {
+      content: '→'; color: var(--fire); flex-shrink: 0; font-weight: 700;
+    }
+
+    /* EQUATION INLINE */
+    .eq-inline {
+      background: var(--ink);
+      border-radius: 5px; padding: 10px 16px;
+      font-family: 'Source Code Pro', monospace;
+      font-size: .88rem; color: rgba(255,255,255,.85);
+      margin: 12px 0; line-height: 1.7;
+    }
+
+    /* COMPARE ROW (vs corpo humano) */
+    .compare-row {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      gap: 12px; align-items: center; margin: 20px 0;
+    }
+    .cmp-box {
+      background: #fff;
+      border: 1px solid var(--rule);
+      border-radius: 6px; padding: 14px 16px;
+    }
+    .cmp-box h4 {
+      font-size: 9px; font-weight: 700; letter-spacing: .18em;
+      text-transform: uppercase; margin-bottom: 6px;
+    }
+    .cmp-box.rocket h4 { color: var(--fire); }
+    .cmp-box.body h4   { color: var(--steam); }
+    .cmp-val { font-family: 'Source Code Pro', monospace; font-size: 1.1rem; color: var(--ink); }
+    .cmp-sep { text-align: center; font-size: .7rem; color: rgba(255,255,255,.3); }
+    .cmp-ratio { font-weight: 700; font-size: .85rem; color: var(--gold); margin-top: 4px; }
+
+    /* TIMELINE MINI */
+    .mini-tl { display: flex; gap: 0; overflow-x: auto; padding-bottom: 0; background:#fff; border-bottom: 1px solid var(--rule); }
+    .mtl-seg {
+      flex: 1; min-width: 80px;
+      padding: 10px 12px;
+      border-right: 1px solid var(--rule); background: #fff;
+      cursor: pointer; transition: background .15s;
+    }
+    .mtl-seg:last-child { border-right: none; }
+    .mtl-seg:hover { background: var(--paper); }
+    .mtl-seg.cur { background: #fdf0ec; }
+    .mtl-t { font-family: 'Source Code Pro', monospace; font-size: .7rem; color: var(--ink-light); }
+    .mtl-name { font-size: .75rem; font-weight: 600; color: var(--ink-mid); margin-top: 3px; }
+    .mtl-dot { width: 8px; height: 8px; border-radius: 50%; margin-bottom: 6px; }
+
+    /* FOOTER */
+    .panel-footer {
+      margin-top: 32px; padding-top: 20px;
+      border-top: 1px solid var(--rule);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
+    }
+    .panel-footer span { font-size: .75rem; color: var(--ink-light); }
+    .nav-btns { display: flex; gap: 10px; }
+    .nav-btn {
+      background: var(--paper); border: 1px solid var(--rule);
+      color: var(--ink-mid); border-radius: 5px;
+      padding: 8px 16px; font-size: .8rem; cursor: pointer;
+      font-family: 'Libre Franklin', sans-serif;
+      transition: background .15s;
+    }
+    .nav-btn:hover { background: #e8eef6; color: var(--accent); border-color: var(--accent); }
+    .nav-btn:disabled { opacity: .3; cursor: default; }
+
+    /* PHASE IMAGE */
+    .phase-img-wrap {
+      margin: 0 0 28px;
+      border-radius: 8px; overflow: hidden;
+      border: 1px solid var(--rule);
+      position: relative;
+    }
+    .phase-img-wrap img {
+      width: 100%; max-height: 280px;
+      object-fit: cover; display: block;
+    }
+    .phase-img-placeholder {
+      width: 100%; height: 200px;
+      background: linear-gradient(135deg, var(--paper-warm) 0%, #e0dcd4 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 8px; color: var(--ink-light);
+    }
+    .phase-img-placeholder .ph-fname {
+      font-family: 'Source Code Pro', monospace;
+      font-size: .78rem; background: rgba(0,0,0,.08);
+      padding: 4px 12px; border-radius: 3px; color: var(--ink-mid);
+    }
+    .phase-img-caption {
+      padding: 8px 14px;
+      font-size: .75rem; color: var(--ink-light);
+      border-top: 1px solid var(--rule);
+      background: #fff;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="topbar-left">
+    <img src="img/logo.png" alt="UFPel Rocket Team" class="topbar-logo">
+    <span class="topbar-brand">UFPel Rocket Team 2026</span>
+  </div>
+  <a href="index.html" class="back-btn">
+    ← Voltar ao Guia Técnico
+  </a>
+</header>
+
+<!-- HERO STRIP -->
+<div class="hero-strip">
+  <h1>Parâmetros da Ascensão — <em>Ignição ao Escape</em></h1>
+  <p>Selecione uma fase para ver como variam força, calor, pressão e velocidade — e quais desafios físicos dominam cada instante da ascensão do Artemis SLS.</p>
+</div>
+
+<!-- MINI TIMELINE -->
+<div style="padding: 0 32px;">
+  <div class="mini-tl" id="miniTl"></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- SIDEBAR -->
+  <nav class="sidebar">
+    <div class="sidebar-title">Fases do Lançamento</div>
+    <div id="sidebarBtns"></div>
+  </nav>
+
+  <!-- CONTENT -->
+  <div class="content" id="content"></div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// DATA — 6 fases com parâmetros completos
+// ═══════════════════════════════════════════════════════════════════
+const phases = [
+  {
+    id: 0,
+    dot: '#c94b1e',
+    img: 'img/painel-fase1-ignicao.jpg',
+    imgcaption: "Ignição dos RS-25 e sistema de dilúvio d'água (IOP/SS) — Pad 39B, Kennedy Space Center",
+    tag: 'Fase 1 · T−6,6 s até T+0',
+    name: 'Ignição & Dilúvio d\'Água',
+    time: 'T−6,6 s',
+    alt: '0 m · Plataforma 39B',
+    params: [
+      { cls:'p-force',    label:'Empuxo RS-25 (4×)',    value:'~25 MN',    unit:'N — Newton',          bar:0.55, desc:'Motores acendem em sequência. Empuxo cresce até atingir 100% antes do liftoff.' },
+      { cls:'p-heat',     label:'Temp. câmara RS-25',   value:'3.600 K',   unit:'Kelvin',               bar:0.98, desc:'Acima do ponto de fusão do tungstênio (3.695 K). Resfriamento regenerativo ativo imediatamente.' },
+      { cls:'p-pressure', label:'Pressão câmara',       value:'48 MPa',    unit:'Pascal',               bar:0.95, desc:'≈ 480 bar. Turbobombas giram a 69.000 hp para injetar LH₂ e LOX.' },
+      { cls:'p-flow',     label:'Dilúvio d\'água',      value:'67.000 L/s',unit:'L/s — vazão',          bar:0.90, desc:'1,7 milhão de litros liberados por gravidade (ΔP = ρgh). Suprime onda de sobrepressão (IOP).' },
+      { cls:'p-heat',     label:'Fluxo calor — garganta','value':'160 MW/m²',unit:'W/m²',              bar:1.00, desc:'Máximo da ascensão. O LH₂ remove calor por convecção forçada nos ~390 canais da parede.' },
+      { cls:'p-velocity', label:'Velocidade do foguete', value:'~0 m/s',   unit:'m/s',                  bar:0.01, desc:'Ainda preso à plataforma pelos hold-down posts. Empuxo cresce antes do liftoff.' },
+    ],
+    challenges: [
+      'Onda de sobrepressão de ignição (IOP) — frente de choque radial que pode danificar a estrutura',
+      'Temperatura de câmara acima do ponto de fusão de qualquer metal — exige resfriamento ativo instantâneo',
+      'Transição súbita de propelentes criogênicos (−253 °C) para gases a 3.600 K em milissegundos',
+      'Fluxo de calor na garganta: 160 MW/m² — 160.000× o limiar de queimadura de 1° grau na pele humana',
+    ],
+    eq: 'q_IOP ∝ ΔP² / ρ_ar     |     q_regen = h_g · (T_aw − T_wg)',
+    body_cmp: { label:'Fluxo de calor', rocket:'160 MW/m²', human:'~0,001 MW/m² (queimadura 1°)', ratio:'×160.000 maior' },
+  },
+  {
+    id: 1,
+    dot: '#e8760a',
+    img: 'img/painel-fase2-decolagem.jpg',
+    imgcaption: "Decolagem do SLS: pluma supersônica com diamantes de choque (Mach disks) visíveis",
+    tag: 'Fase 2 · T+0 até T+50 s',
+    name: 'Decolagem — Aceleração Subsônica',
+    time: 'T+0 s',
+    alt: '0 → 8 km · Mach 0 → 0,8',
+    params: [
+      { cls:'p-force',    label:'Empuxo total (RS-25 + SRB)', value:'39 MN',  unit:'N — Newton',    bar:1.00, desc:'Pico de empuxo. 4× RS-25 + 2× boosters sólidos. 15% acima do Saturn V.' },
+      { cls:'p-force',    label:'Peso total do veículo',       value:'26,5 MN',unit:'N — Newton',   bar:0.68, desc:'≈ 2,7 M kg. O empuxo supera o peso em ~47% — resultante ascendente de ~12,5 MN.' },
+      { cls:'p-velocity', label:'Velocidade',                  value:'0→340 m/s',unit:'m/s',        bar:0.20, desc:'Aceleração ~0 a Mach 1. A ~150 m/s, os diamantes de choque tornam-se visíveis na pluma.' },
+      { cls:'p-heat',     label:'Temp. câmara RS-25',          value:'3.600 K',unit:'Kelvin',       bar:0.98, desc:'Mantida constante. Resfriamento regenerativo + film cooling sustentam a operação.' },
+      { cls:'p-pressure', label:'Pressão dinâmica q',          value:'↗ crescendo',unit:'Pa',       bar:0.30, desc:'q = ½ρv² cresce rapidamente. Densidade ainda alta (nível do mar). Arrasto aumenta com v².' },
+      { cls:'p-flow',     label:'Consumo de propelente',       value:'~2.500 kg/s',unit:'kg/s',    bar:0.85, desc:'LH₂ + LOX + propelente sólido. O foguete perde ~40% da massa em 2 minutos de boosters.' },
+    ],
+    challenges: [
+      'Diamantes de choque (Mach disks) na pluma — ondas oblíquas e leques de Prandtl-Meyer',
+      'Momento fletor: foguete esbelta de 100 m sob empuxo assimétrico e vento cisalhante',
+      'Resfriamento regenerativo com LH₂ variando de −253 °C (entrada) a ~300 K (saída dos canais)',
+      'Ruído acústico estrutural: campo de pressão oscilante dos gases supersônicos sobre a fuselagem',
+    ],
+    eq: 'Δv = Isp · g₀ · ln(m₀/mf)     |     F_drag = ½ · C_D · ρ · v² · A',
+    body_cmp: { label:'Força resultante', rocket:'12,5 MN ascendente', human:'Coração: ~2 N por batimento', ratio:'×6.250.000 maior' },
+  },
+  {
+    id: 2,
+    dot: '#5a6278',
+    img: 'img/painel-fase3-transonico.jpg',
+    imgcaption: "Regime transônico: simulação CFD das ondas de choque ao redor da fuselagem (Mach 0,8–1,4)",
+    tag: 'Fase 3 · T+45–60 s',
+    name: 'Regime Transônico',
+    time: 'T+50 s',
+    alt: '6–10 km · Mach 0,8 → 1,4',
+    params: [
+      { cls:'p-velocity', label:'Velocidade',              value:'272→476 m/s',unit:'m/s (Mach 0,8→1,4)',bar:0.35, desc:'Cruzamento da barreira do som. C_D pode triplicar nesta faixa — arrasto aumenta abruptamente.' },
+      { cls:'p-pressure', label:'Pressão dinâmica q',      value:'~20–30 kPa', unit:'Pascal',             bar:0.70, desc:'Crescendo rapidamente. Ondas de choque normais e oblíquas formam-se em pontos críticos.' },
+      { cls:'p-heat',     label:'Temp. estagnação (nariz)', value:'~400–600 K', unit:'Kelvin',            bar:0.30, desc:'T₀ = T∞·(1 + 0,2·M²). Em Mach 1,5: ar comprimido adiabaticamente a ~400 K na ponta.' },
+      { cls:'p-force',    label:'Coef. de arrasto C_D',    value:'↑↑ pico',    unit:'adimensional',       bar:0.85, desc:'No transônico, C_D pode triplicar em relação ao subsônico. Arrasto de onda domina.' },
+      { cls:'p-force',    label:'Empuxo RS-25',            value:'65–72% N',   unit:'throttle-down',      bar:0.65, desc:'Redução intencional de empuxo para limitar v e portanto q = ½ρv² no pico de estresse.' },
+      { cls:'p-thermal',  label:'Interação choque/CL',     value:'SWBLI',      unit:'fenômeno',           bar:0.80, desc:'Shock-wave/boundary-layer interaction: picos locais de pressão e temperatura na parede.' },
+    ],
+    challenges: [
+      'Equações linearizadas da aerodinâmica compressível colapsam — C_D e ρ deixam de ser constantes',
+      'Shock buffeting: ondas de choque normais oscilam ao longo da fuselagem, excitando frequências estruturais',
+      'SWBLI — interação choque/camada-limite cria picos de pressão e temperatura localizados',
+      'Throttle-down dos RS-25: reduzir v em 10% corta F_drag em ~19% — controle fino de empuxo crítico',
+    ],
+    eq: 'T₀ = T∞ · (1 + (γ−1)/2 · M²)     |     C_D(M) ≠ const — colapso da linearização',
+    body_cmp: { label:'Temperatura de estagnação', rocket:'~500 K no nariz do foguete', human:'315 K = falência orgânica (42 °C)', ratio:'Δ = 185 K acima do limite humano' },
+  },
+  {
+    id: 3,
+    dot: '#8b2252',
+    img: 'img/painel-fase4-maxq.jpg',
+    imgcaption: "Max-Q: pico de pressão dinâmica — maior carga estrutural de toda a ascensão",
+    tag: 'Fase 4 · T+60–80 s',
+    name: 'Max-Q — Pressão Dinâmica Máxima',
+    time: 'T+70 s',
+    alt: '11–15 km · Mach ~1,5',
+    params: [
+      { cls:'p-pressure', label:'Pressão dinâmica Max-Q',  value:'~35 kPa',    unit:'Pascal',        bar:1.00, desc:'Pico de q = ½ρv² durante toda a ascensão. Maior carga estrutural e aerodinâmica da missão.' },
+      { cls:'p-velocity', label:'Velocidade',              value:'~510 m/s',   unit:'m/s (Mach 1,5)',bar:0.40, desc:'Supersônico. Ondas de choque oblíquas presentes em toda a estrutura.' },
+      { cls:'p-force',    label:'Força de arrasto F_drag', value:'~pico',      unit:'N = ½·C_D·ρ·v²·A',bar:0.95,desc:'F_drag = ½·C_D·ρ·v²·A. Dobrar v quadruplica o arrasto — por isso o throttle-down é crítico.' },
+      { cls:'p-heat',     label:'Fluxo calor aerodinâmico','value':'máx. ascensão',unit:'W/m²',      bar:0.65, desc:'q" = St·ρ·v·(h_aw − h_w). A baixa densidade (~11 km) atenua o fluxo vs. reentrada.' },
+      { cls:'p-force',    label:'Momento fletor lateral',  value:'↑↑ crítico', unit:'N·m',           bar:1.00, desc:'Qualquer ângulo de ataque em 100 m de estrutura gera momento fletor enorme. Gimbal ativo.' },
+      { cls:'p-velocity', label:'Altitude',                value:'11–15 km',   unit:'m',             bar:0.10, desc:'Entre tropopausa e estratosfera. Densidade ainda suficiente para criar q significativo.' },
+    ],
+    challenges: [
+      'q = ½ρv² máximo — produto da densidade ainda alta com velocidade já elevada',
+      'F_drag ∝ v²: qualquer desvio de trajetória quadruplica rapidamente a carga de arrasto lateral',
+      'Aquecimento aerodinâmico máximo da ascensão — camada-limite turbulenta aquecendo a fuselagem',
+      'Gravity turn ativo: gimbal dos motores controlando o ângulo de ataque próximo de zero',
+    ],
+    eq: 'q = ½·ρ(h)·v²(t)     |     F_drag = C_D·A·q = ½·C_D·ρ·v²·A',
+    body_cmp: { label:'Pressão sobre a estrutura', rocket:'35 kPa sobre 100 m de foguete', human:'Curativo alta compressão: 8–12 kPa', ratio:'×3–4 maior, em área 10.000× maior' },
+  },
+  {
+    id: 4,
+    dot: '#d4870a',
+    img: 'img/painel-fase5-boosters.jpg',
+    imgcaption: "Separação dos boosters sólidos a ~45 km: ar rarefeito, Mach 4+, BSM em ação",
+    tag: 'Fase 5 · T+127 s',
+    name: 'Separação dos Boosters',
+    time: 'T+127 s',
+    alt: '~45 km · Mach 4+',
+    params: [
+      { cls:'p-pressure', label:'Densidade do ar',        value:'<1% do NM',  unit:'kg/m³',         bar:0.01, desc:'Em 45 km, ρ ≈ 0,002 kg/m³ vs. 1,225 kg/m³ ao nível do mar. Arrasto quase nulo.' },
+      { cls:'p-pressure', label:'Pressão dinâmica q',     value:'~1% Max-Q',  unit:'Pascal',         bar:0.01, desc:'q caiu drasticamente. Ondas de choque enfraquecem. Regime caminha para escoamento rarefeito.' },
+      { cls:'p-velocity', label:'Velocidade',             value:'~1.400 m/s', unit:'m/s (Mach ~4)',  bar:0.55, desc:'Supersônico alto. Sem arrasto significativo, a velocidade aumenta cada vez mais eficientemente.' },
+      { cls:'p-heat',     label:'Aquecimento aerodinâmico','value':'↓ decaindo',unit:'W/m²',         bar:0.05, desc:'ρ cai mais rápido que v cresce → produto ρ·v³ (∝ fluxo de calor) decresce.' },
+      { cls:'p-force',    label:'Massa vazia por booster', value:'~90.000 kg', unit:'kg',            bar:0.50, desc:'Após queimar 500.000 kg de propelente sólido cada. BSM os empurram a ~4 m/s do estágio central.' },
+      { cls:'p-velocity', label:'Livre caminho médio',    value:'↑ crescendo', unit:'m (moléculas)', bar:0.40, desc:'Transição: escoamento contínuo (Navier-Stokes) → escoamento molecular rarefeito.' },
+    ],
+    challenges: [
+      'Separação de objetos de 90 t em escoamento rarefeito — controle quase puramente mecânico (BSM)',
+      'Transição do regime contínuo para molecular: equações de Navier-Stokes perdem validade gradualmente',
+      'Fairing pode ser ejetado (~35 km): calor aerodinâmico caiu abaixo de 1.135 W/m² sobre a carga útil',
+      'Ondas de choque residuais em Mach 4 — fracas mas ainda presentes; interação com boosters em separação',
+    ],
+    eq: 'q_aero = ½·ρ(h)·v²·C_D → 0     |     Kn = λ/L ↑ (regime rarefeito)',
+    body_cmp: { label:'Pressão do ar externo', rocket:'<100 Pa a 45 km', human:'Pressão atm. ao nível do mar: 101.325 Pa', ratio:'1.000× menor — quase vácuo' },
+  },
+  {
+    id: 5,
+    dot: '#1b4f8a',
+    img: 'img/painel-fase6-orbita.jpg',
+    imgcaption: "Órbita de estacionamento e escape da Terra: transferência de calor dominada por radiação",
+    tag: 'Fase 6 · T+510 s e além',
+    name: 'Órbita & Escape da Terra',
+    time: 'T+510 s',
+    alt: '>150 km · ≥7,8 km/s',
+    params: [
+      { cls:'p-velocity', label:'Velocidade orbital LEO',  value:'7.800 m/s', unit:'m/s',            bar:0.70, desc:'Mínimo para órbita circular a ~200 km. v² = GM/r. A este ponto, MECO — motores desligam.' },
+      { cls:'p-velocity', label:'Velocidade de escape',    value:'11.200 m/s',unit:'m/s',            bar:1.00, desc:'v_e = √(2GM/R) ≈ 11,2 km/s. Energia cinética = energia potencial gravitacional.' },
+      { cls:'p-pressure', label:'Pressão dinâmica',        value:'≈ 0 Pa',    unit:'Pascal',         bar:0.00, desc:'Sem atmosfera acima de ~150 km. Mecânica dos fluidos clássica encerrada.' },
+      { cls:'p-heat',     label:'Irradiância solar',       value:'1.361 W/m²',unit:'W/m² (Stefan-Boltzmann)',bar:0.15, desc:'Única fonte de calor externo. q = ε·σ·T⁴. Gestão por MLI e revestimentos.' },
+      { cls:'p-heat',     label:'Escudo Avcoat — reentrada','value':'~3.000°C',unit:'Kelvin (ablação)',bar:0.85, desc:'Ao retornar, a Orion enfrenta ~2.760 °C. Avcoat pirolisa e remove calor da nave por ablação.' },
+      { cls:'p-thermal',  label:'Mecanismo de calor',      value:'Radiação',  unit:'único mecanismo', bar:0.15, desc:'Sem fluido: sem condução, sem convecção. q_rad = ε·σ·T⁴. Temperatura: −150 °C a +120 °C.' },
+    ],
+    challenges: [
+      'Zero pressão dinâmica: toda a aerodinâmica cessa — mecânica orbital e termodinâmica radiativa dominam',
+      'Radiação como único mecanismo de troca de calor: q = ε·σ·T⁴ (Lei de Stefan-Boltzmann)',
+      'Gestão térmica extrema: de −150 °C (sombra) a +120 °C (Sol) sem convecção disponível',
+      'Reentrada: ablação controlada do Avcoat remove calor de ~3.000 °C — "ferida proposital" que salva a nave',
+    ],
+    eq: 'v_e = √(2GM/R) ≈ 11,2 km/s     |     q_rad = ε · σ · T⁴',
+    body_cmp: { label:'Velocidade', rocket:'11.200 m/s (escape)', human:'Impulso nervoso mielinizado: 70 m/s', ratio:'×160 mais rápido que sinal nervoso' },
+  },
+];
+
+// ═══════════════════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════════════════
+let current = 0;
+
+function barColor(cls) {
+  const map = { 'p-force':'#c94b1e','p-heat':'#e8760a','p-pressure':'#5ba3c9','p-velocity':'#d4870a','p-flow':'#2d7a4e','p-thermal':'#a855f7' };
+  return map[cls] || '#fff';
+}
+
+function renderSidebar() {
+  const el = document.getElementById('sidebarBtns');
+  el.innerHTML = phases.map((p,i) => `
+    <button class="phase-btn ${i===current?'active':''}" onclick="goto(${i})">
+      <span class="pb-dot" style="background:${p.dot}"></span>
+      <div>
+        <div class="pb-label">${p.name}</div>
+        <div class="pb-time">${p.time} · ${p.alt.split('·')[0].trim()}</div>
+      </div>
+    </button>
+  `).join('');
+}
+
+function renderMiniTl() {
+  const el = document.getElementById('miniTl');
+  el.innerHTML = phases.map((p,i) => `
+    <div class="mtl-seg ${i===current?'cur':''}" onclick="goto(${i})">
+      <div class="mtl-dot" style="background:${p.dot}"></div>
+      <div class="mtl-t">${p.time}</div>
+      <div class="mtl-name">${p.name.split('—')[0].trim()}</div>
+    </div>
+  `).join('');
+}
+
+function renderContent() {
+  const p = phases[current];
+  const el = document.getElementById('content');
+  el.innerHTML = `
+    <div class="phase-panel active">
+      <div class="panel-header">
+        <div class="panel-phase-tag">${p.tag}</div>
+        <h2>${p.name}</h2>
+        <div class="panel-alt">📍 ${p.alt}</div>
+      </div>
+
+      <div class="param-grid">
+        ${p.params.map(pm => `
+          <div class="param-card ${pm.cls}">
+            <div class="param-label">${pm.label}</div>
+            <div class="param-value">${pm.value}</div>
+            <div class="param-unit">${pm.unit}</div>
+            <div class="bar-wrap">
+              <div class="bar-track">
+                <div class="bar-fill" style="width:${Math.round(pm.bar*100)}%; background:${barColor(pm.cls)};"></div>
+              </div>
+            </div>
+            <div class="param-desc">${pm.desc}</div>
+          </div>
+        `).join('')}
+      </div>
+
+      <div class="challenge-box">
+        <div class="challenge-tag">⚠ Desafios Físicos desta Fase</div>
+        <ul class="challenge-list">
+          ${p.challenges.map(c => `<li>${c}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div class="eq-inline">${p.eq}</div>
+
+      <div class="compare-row">
+        <div class="cmp-box rocket">
+          <h4>🚀 Foguete</h4>
+          <div class="cmp-val">${p.body_cmp.rocket}</div>
+        </div>
+        <div class="cmp-sep">${p.body_cmp.label}<br>vs.</div>
+        <div class="cmp-box body">
+          <h4>🩺 Corpo Humano</h4>
+          <div class="cmp-val">${p.body_cmp.human}</div>
+          <div class="cmp-ratio">${p.body_cmp.ratio}</div>
+        </div>
+      </div>
+
+      <div class="panel-footer">
+        <span>UFPel Rocket Team 2026 · G10 Feridas Crônicas · PET-Saúde/UFPel</span>
+        <div class="nav-btns">
+          <button class="nav-btn" onclick="goto(${current-1})" ${current===0?'disabled':''}>← Fase anterior</button>
+          <button class="nav-btn" onclick="goto(${current+1})" ${current===phases.length-1?'disabled':''}>Próxima fase →</button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function goto(i) {
+  if (i < 0 || i >= phases.length) return;
+  current = i;
+  renderSidebar();
+  renderMiniTl();
+  renderContent();
+  document.querySelector('.content').scrollTop = 0;
+}
+
+// INIT
+renderSidebar();
+renderMiniTl();
+renderContent();
+</script>
+</body>
+</html>
